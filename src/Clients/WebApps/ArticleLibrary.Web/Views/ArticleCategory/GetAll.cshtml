@@ -1,0 +1,21 @@
+﻿@using ArticleLibrary.Web.Models.DTO
+@model List<ArticleCategoryDTO>
+@{
+    ViewData["Title"] = "GetAll";
+}
+
+<table class="table table-bordered">
+    <tr>
+        <td>Kategori</td>
+    </tr>
+    @foreach (var x in Model)
+    {
+        <tr>
+            <td>@x.Category</td>
+            <td>@Html.ActionLink("Delete", "Author", "Delete", new { Id = x.Id }, new { @class = "btn btn-danger", onclick = "return confirm('Are you sure you want to delete this Author?')" })</td>
+        </tr>
+    }
+</table>
+<div class="text-center">
+    <a href="/ArticleCategory/Add" class="btn btn-primary">Add</a>
+</div>

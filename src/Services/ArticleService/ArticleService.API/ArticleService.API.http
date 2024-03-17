@@ -1,0 +1,13 @@
+@ArticleService.API_HostAddress = http://localhost:5096
+
+GET {{ArticleService.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+GET {{ArticleService.API_HostAddress}}/api/Article/GetAll
+Content-Type: application/json
+
+###
+
+GET {{ArticleService.API_HostAddress}}/api/ArticleCategory/GetAll

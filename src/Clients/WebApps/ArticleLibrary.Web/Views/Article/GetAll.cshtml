@@ -1,0 +1,22 @@
+﻿@using ArticleLibrary.Web.Models.DTO;
+@model List<ArticleDTO>;
+@{
+    ViewData["Title"] = "GetAll";
+}
+
+<table class="table table-bordered">
+    <tr>
+        <td>Title</td>
+        <td>Text</td>
+    </tr>
+    @foreach (var x in Model)
+    {
+        <tr>
+            <td>@x.Title</td>
+            <td>@x.Text</td>
+        </tr>
+    }
+</table>
+<div class="text-center">
+    <a href="/Article/Add" class="btn btn-primary">Add</a>
+</div>
