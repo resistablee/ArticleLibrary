@@ -28,7 +28,7 @@
     },
     {
       "UpstreamHttpMethod": [ "Get", "Post" ],
-      "UpstreamPathTemplate": "/api/gateway/articleCategory/{everything}",
+      "UpstreamPathTemplate": "/api/gateway/article-category/{everything}",
 
       "DownstreamPathTemplate": "/api/ArticleCategory/{everything}",
       "DownstreamScheme": "https",

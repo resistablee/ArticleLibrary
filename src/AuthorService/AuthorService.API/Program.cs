@@ -4,6 +4,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    string? redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+    if (string.IsNullOrEmpty(redisConnectionString))
+        throw new InvalidOperationException("Connection string 'Redis' not found.");
+
+    options.InstanceName = "article-api_"; // Cache keyleri için önek
+    options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
+    {
+        EndPoints = { redisConnectionString },
+        AbortOnConnectFail = false,
+        ConnectRetry = 5,
+        ConnectTimeout = 1000,
+        SyncTimeout = 1000,
+    };
+});
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -4,6 +4,8 @@ using AuthorService.API.Models.Entities;
 using AuthorService.API.Models.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace AuthorService.API.Models.Services
 {
@@ -11,11 +13,15 @@ namespace AuthorService.API.Models.Services
     {
         private readonly AuthorDbContext _authorDbContext;
         private readonly IMapper _Mapper;
+        private readonly IDistributedCache _cache;
 
-        public AuthorService(AuthorDbContext authorDbContext, IMapper mapper)
+        private const string CacheKey = "AuthorCache";
+
+        public AuthorService(AuthorDbContext authorDbContext, IMapper mapper, IDistributedCache cache)
         {
             _authorDbContext = authorDbContext;
             _Mapper = mapper;
+            _cache = cache;
         }
 
         public DbSet<Author> Table => _authorDbContext.Set<Author>();
@@ -31,20 +37,44 @@ namespace AuthorService.API.Models.Services
         public IQueryable<Author> GetAll(bool tracking = true)
         {
             var query = Table.AsQueryable();
-            if (!tracking) query = query.AsNoTracking();
+            if (!tracking) 
+                query = query.AsNoTracking();
+
             return query;
         }
 
-        public async Task<Author> GetByIdAsync(string id, bool tracking = true)
+        public async Task<Author?> GetByIdAsync(string id, bool tracking = true)
         {
             var query = Table.AsQueryable();
-            if (!tracking) query = query.AsNoTracking();
-            return await query.FirstOrDefaultAsync(x => x.Id == Guid.Parse(id));
+            if (!tracking) 
+                query = query.AsNoTracking();
+
+            if (_cache.GetString($"{CacheKey}_{id}") is not null)
+            {
+                var cachedAuthor = _cache.GetString($"{CacheKey}_{id}");
+                return JsonSerializer.Deserialize<Author>(cachedAuthor);
+            }
+
+            var author = await query.FirstOrDefaultAsync(x => x.Id == Guid.Parse(id));
+
+            var serializedAuthor = JsonSerializer.Serialize(author);
+            var options = new DistributedCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromMinutes(5))
+                .SetAbsoluteExpiration(DateTime.Now.AddHours(1));
+
+            await _cache.SetStringAsync($"{CacheKey}_{id}", serializedAuthor, options);
+
+            return author;
         }
 
         public async Task<dynamic> RemoveAsync(string id)
         {
-            await RemoveAsync(id);
+            // cache'de varsa sil
+            if (_cache.GetString($"{CacheKey}_{id}") is not null)
+            {
+                await _cache.RemoveAsync($"{CacheKey}_{id}");
+            }
+
             await SaveChangesAsync();
             return true;
         }

@@ -12,8 +12,12 @@ namespace AuthorService.API.Models
     {
         public static IServiceCollection AddAuthorDbContext(this IServiceCollection serviceCollection, IConfiguration configuration)
         {
+            string? connectionString = configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(connectionString))
+                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
             serviceCollection.AddDbContext<AuthorDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("SqlServer")));
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
             return serviceCollection;
         }

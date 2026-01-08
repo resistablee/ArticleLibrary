@@ -15,7 +15,7 @@ namespace ArticleLibrary.Web.Models.Services
             _httpClient = new HttpClient();
             _httpClient.Timeout = new TimeSpan(0, 1, 0);
 
-            BaseUrl = $"{configuration["GatewayUrl"]}/articleCategory";
+            BaseUrl = $"{configuration["GatewayUrl"]}/article-category";
         }
 
         public async Task AddAsync(ArticleCategoryAddDTO articleCategoryAdd)
